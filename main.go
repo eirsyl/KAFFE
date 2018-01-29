@@ -22,6 +22,7 @@ import (
 	_ "github.com/kidoman/embd/host/rpi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/push"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,15 +34,11 @@ func pushMetrics(pushgateway string, registry *prometheus.Registry) error {
 	}
 
 	log.Infof("Pushing metrics to: %v", pushgateway)
-	log.Infof("Pushing as instance: %s", hostname)
-	return nil
-	/*
-		return push.AddFromGatherer(
-			"moccamaster", map[string]string{"instance": hostname},
-			pushgateway,
-			registry,
-		)
-	*/
+	return push.AddFromGatherer(
+		"moccamaster", map[string]string{"instance": hostname},
+		pushgateway,
+		registry,
+	)
 }
 
 func main() {
@@ -127,7 +124,7 @@ func main() {
 			time.Sleep(30 * time.Second)
 			err := pushMetrics(*pushgateway, registry)
 			if err != nil {
-				failure <- err
+				log.Warn("Could not push metrics: %v", err)
 			}
 		}
 	}()
