@@ -9,9 +9,21 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/golang/glog"
+  packages = ["."]
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+
+[[projects]]
+  branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kidoman/embd"
+  packages = [".","host/generic","host/rpi"]
+  revision = "d3d8c0c5c68dc6caccebb7d720f36e64bafd0a62"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -21,7 +33,7 @@
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
-  packages = ["prometheus","prometheus/push"]
+  packages = ["prometheus"]
   revision = "c5b7fccd204277076155f10851dad72b76a49317"
   version = "v0.8.0"
 
@@ -50,6 +62,12 @@
   version = "v1.0.4"
 
 [[projects]]
+  name = "github.com/stianeikeland/go-rpio"
+  packages = ["."]
+  revision = "a6b0dffd47b6b1ddf7f1bfe2144f05bf335e911d"
+  version = "4.0.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -64,6 +82,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b5eace26614c331f6d9fc088d32935ebc396d31408d0deb323afdefe2ea1b493"
+  inputs-digest = "694adda491976f92267f9eb6adeace83bddfba241f5c0cd7fc60531bca51e755"
   solver-name = "gps-cdcl"
   solver-version = 1

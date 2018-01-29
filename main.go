@@ -9,8 +9,17 @@ import (
 
 	"syscall"
 
+	"sync"
+
+	"kaffe/observers"
+
+	"net/http"
+
+	"github.com/kidoman/embd"
+	"github.com/kidoman/embd/convertors/mcp3008"
+	_ "github.com/kidoman/embd/host/rpi"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/push"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,11 +31,15 @@ func pushMetrics(pushgateway string, registry *prometheus.Registry) error {
 	}
 
 	log.Infof("Pushing metrics to: %v", pushgateway)
-	return push.AddFromGatherer(
-		"moccamaster", map[string]string{"instance": hostname},
-		pushgateway,
-		registry,
-	)
+	log.Infof("Pushing as instance: %s", hostname)
+	return nil
+	/*
+		return push.AddFromGatherer(
+			"moccamaster", map[string]string{"instance": hostname},
+			pushgateway,
+			registry,
+		)
+	*/
 }
 
 func main() {
@@ -37,9 +50,28 @@ func main() {
 		log.Fatalf("The pushgateway flag cannot be empty")
 	}
 
+	if err := embd.InitSPI(); err != nil {
+		panic(err)
+	}
+	defer embd.CloseSPI()
+
+	const (
+		channel = 0
+		speed   = 1000000
+		bpw     = 8
+		delay   = 0
+	)
+
+	spiBus := embd.NewSPIBus(embd.SPIMode0, channel, speed, bpw, delay)
+	defer spiBus.Close()
+	adc := mcp3008.New(mcp3008.SingleMode, spiBus)
+
+	var mutex = &sync.Mutex{}
+
 	metrics := []MetricObserver{
-		NewPlateTempObserver(),
-		NewPlateModeObserver(),
+		observers.NewPlateModeObserver(adc, mutex),
+		observers.NewPowerObserver(adc, mutex),
+		observers.NewWaterContainerObserver(adc, mutex),
 	}
 
 	registry := prometheus.NewRegistry()
@@ -71,6 +103,16 @@ func main() {
 			if err != nil {
 				failure <- err
 			}
+		}
+	}()
+
+	go func() {
+		addr := ":8081"
+		http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
+		log.Infof("Prometheus handler is listening on %v", addr)
+		err := http.ListenAndServe(addr, nil)
+		if err != nil {
+			failure <- err
 		}
 	}()
 
