@@ -95,6 +95,7 @@ func main() {
 		observers.NewPowerObserver(adc, mutex),
 		observers.NewWaterContainerObserver(adc, mutex),
 		observers.NewPlateTempObserver(adc, mutex),
+		observers.NewWaterFlowObserver(adc, mutex),
 	}
 
 	registry := prometheus.NewRegistry()
