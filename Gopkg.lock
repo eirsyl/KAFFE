@@ -22,7 +22,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/kidoman/embd"
-  packages = [".","host/generic","host/rpi"]
+  packages = [".","convertors/mcp3008","host/generic","host/rpi"]
   revision = "d3d8c0c5c68dc6caccebb7d720f36e64bafd0a62"
 
 [[projects]]
@@ -32,8 +32,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/nlopes/slack"
+  packages = ["."]
+  revision = "c86337c0ef2486a15edd804355d9c73d2f2caed1"
+  version = "v0.1.0"
+
+[[projects]]
   name = "github.com/prometheus/client_golang"
-  packages = ["prometheus"]
+  packages = ["prometheus","prometheus/promhttp"]
   revision = "c5b7fccd204277076155f10851dad72b76a49317"
   version = "v0.8.0"
 
@@ -62,16 +68,16 @@
   version = "v1.0.4"
 
 [[projects]]
-  name = "github.com/stianeikeland/go-rpio"
-  packages = ["."]
-  revision = "a6b0dffd47b6b1ddf7f1bfe2144f05bf335e911d"
-  version = "4.0.0"
-
-[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   revision = "1875d0a70c90e57f11972aefd42276df65e895b9"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["websocket"]
+  revision = "0ed95abb35c445290478a5348a7b38bb154135fd"
 
 [[projects]]
   branch = "master"
@@ -82,6 +88,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "694adda491976f92267f9eb6adeace83bddfba241f5c0cd7fc60531bca51e755"
+  inputs-digest = "1d8b016b5257b67629c287ad561c977c984e61df147b04d0f9967035a6307a77"
   solver-name = "gps-cdcl"
   solver-version = 1

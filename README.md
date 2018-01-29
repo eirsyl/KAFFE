@@ -5,3 +5,4 @@
 * 0 - plateMode
 * 1 - power
 * 2 - waterContainer
+* 3 - plateTemp

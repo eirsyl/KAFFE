@@ -15,6 +15,8 @@ import (
 
 	"net/http"
 
+	"net"
+
 	"github.com/kidoman/embd"
 	"github.com/kidoman/embd/convertors/mcp3008"
 	_ "github.com/kidoman/embd/host/rpi"
@@ -44,10 +46,33 @@ func pushMetrics(pushgateway string, registry *prometheus.Registry) error {
 
 func main() {
 	var pushgateway = flag.String("pushgateway", "http://127.0.0.1:9091", "pushgateway url")
+	var slackToken = flag.String("slacktoken", "", "slack bot token")
+	var slackChannel = flag.String("slackchannel", "#general", "slack channel")
 	flag.Parse()
 
 	if *pushgateway == "" {
 		log.Fatalf("The pushgateway flag cannot be empty")
+	}
+
+	if *slackToken != "" && *slackChannel != "" {
+		go func() {
+			var lastIP net.IP
+			for {
+				time.Sleep(60 * time.Second)
+				ip, err := GetOutboundIP()
+				if err != nil {
+					log.Warn("Could not find outbound ip: %v", err)
+					continue
+				}
+				if !lastIP.Equal(ip) {
+					err = PostToSlack(*slackToken, *slackChannel, ip)
+					if err != nil {
+						log.Warn("Could not post message to slack: %v", err)
+					}
+					lastIP = ip
+				}
+			}
+		}()
 	}
 
 	if err := embd.InitSPI(); err != nil {
@@ -72,6 +97,7 @@ func main() {
 		observers.NewPlateModeObserver(adc, mutex),
 		observers.NewPowerObserver(adc, mutex),
 		observers.NewWaterContainerObserver(adc, mutex),
+		observers.NewPlateTempObserver(adc, mutex),
 	}
 
 	registry := prometheus.NewRegistry()

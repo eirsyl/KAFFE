@@ -5,6 +5,7 @@ import (
 
 	"github.com/kidoman/embd/convertors/mcp3008"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 type PlateTempObserver struct {
@@ -17,7 +18,7 @@ func NewPlateTempObserver(mpc *mcp3008.MCP3008, mut *sync.Mutex) *PlateTempObser
 	return &PlateTempObserver{
 		plateTemp: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "plate_temp",
-			Help: "",
+			Help: "Plate temperature in celsius",
 		}),
 		mpc: mpc,
 		mut: mut,
@@ -28,6 +29,16 @@ func (p *PlateTempObserver) Observe() error {
 	p.mut.Lock()
 	defer p.mut.Unlock()
 
+	log.Infof("Collecting: %v", "plate temp")
+
+	readValue, err := p.mpc.AnalogValueAt(3)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("plate temp: %v", readValue)
+
+	p.plateTemp.Set(float64(readValue))
 	return nil
 }
 
