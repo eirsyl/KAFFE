@@ -25,6 +25,14 @@ func NewPowerObserver(mpc *mcp3008.MCP3008, mut *sync.Mutex) *PowerObserver {
 	}
 }
 
+func (p *PowerObserver) Run() error {
+	return nil
+}
+
+func (p *PowerObserver) Stop() error {
+	return nil
+}
+
 func (p *PowerObserver) Observe() error {
 	p.mut.Lock()
 	defer p.mut.Unlock()

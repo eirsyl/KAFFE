@@ -25,6 +25,14 @@ func NewPlateTempObserver(mpc *mcp3008.MCP3008, mut *sync.Mutex) *PlateTempObser
 	}
 }
 
+func (p *PlateTempObserver) Run() error {
+	return nil
+}
+
+func (p *PlateTempObserver) Stop() error {
+	return nil
+}
+
 func (p *PlateTempObserver) Observe() error {
 	p.mut.Lock()
 	defer p.mut.Unlock()

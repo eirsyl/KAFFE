@@ -94,23 +94,32 @@ func main() {
 	adc := mcp3008.New(mcp3008.SingleMode, spiBus)
 
 	var mutex = &sync.Mutex{}
+	var failure = make(chan error, 1)
 
 	metrics := []MetricObserver{
 		observers.NewPlateModeObserver(adc, mutex),
 		observers.NewPowerObserver(adc, mutex),
 		observers.NewWaterContainerObserver(adc, mutex),
 		observers.NewPlateTempObserver(adc, mutex),
-		observers.NewWaterFlowObserver(adc, mutex),
+		observers.NewWaterFlowObserver(),
 	}
 
 	registry := prometheus.NewRegistry()
 	for _, observer := range metrics {
-		log.Infof("Adding observer: %v", observer)
+		log.Infof("Adding and starting observer: %v", observer)
 		registry.MustRegister(observer.Collector())
 	}
 
-	var failure = make(chan error, 1)
 	for _, observer := range metrics {
+		// Run the observer as a background goroutine
+		go func(ob MetricObserver) {
+			err := ob.Run()
+			if err != nil {
+				failure <- err
+			}
+		}(observer)
+
+		// Run the observer function in a loop with 10s delay
 		go func(ob MetricObserver) {
 			for {
 				err := ob.Observe()
@@ -145,47 +154,17 @@ func main() {
 		}
 	}()
 
-	go func() {
-		// Testing code for flow sensor
-		flow, err := embd.NewDigitalPin(26)
-		if err != nil {
-			log.Errorf("Could not open flow gpio: %v", err)
-			failure <- err
-		}
-		defer flow.Close()
-
-		if err := flow.SetDirection(embd.In); err != nil {
-			log.Errorf("Could not set pin direction: %v", err)
-			failure <- err
-		}
-		flow.ActiveLow(true)
-
-		reading := make(chan bool)
-		go func(c chan bool) {
-			err := flow.Watch(embd.EdgeRising, func(flow embd.DigitalPin) {
-				log.Info("Received pin interrupt")
-				reading <- true
-			})
-			if err != nil {
-				log.Errorf("Could not watch port: %v", err)
-				failure <- err
-			}
-		}(reading)
-
-		var flowCounter int
-		for {
-			res := <-reading
-			if res {
-				flowCounter++
-			}
-			log.Infof("flow reader counter: %v", flowCounter)
-		}
-	}()
-
 	select {
 	case sig := <-terminate:
 		log.Errorf("Received signal: %v", sig)
 	case err := <-failure:
 		log.Errorf("Internal error: %v", err)
+	}
+
+	for _, observer := range metrics {
+		err := observer.Stop()
+		if err != nil {
+			log.Errorf("Could not stop observer %v: %v", observer, err)
+		}
 	}
 }

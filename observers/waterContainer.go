@@ -25,6 +25,14 @@ func NewWaterContainerObserver(mpc *mcp3008.MCP3008, mut *sync.Mutex) *WaterCont
 	}
 }
 
+func (p *WaterContainerObserver) Run() error {
+	return nil
+}
+
+func (p *WaterContainerObserver) Stop() error {
+	return nil
+}
+
 func (p *WaterContainerObserver) Observe() error {
 	p.mut.Lock()
 	defer p.mut.Unlock()
