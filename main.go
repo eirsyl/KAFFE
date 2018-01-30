@@ -72,6 +72,11 @@ func main() {
 		}()
 	}
 
+	if err := embd.InitGPIO(); err != nil {
+		panic(err)
+	}
+	defer embd.CloseGPIO()
+
 	if err := embd.InitSPI(); err != nil {
 		panic(err)
 	}
@@ -137,6 +142,43 @@ func main() {
 		err := http.ListenAndServe(addr, nil)
 		if err != nil {
 			failure <- err
+		}
+	}()
+
+	go func() {
+		// Testing code for flow sensor
+		flow, err := embd.NewDigitalPin(26)
+		if err != nil {
+			log.Errorf("Could not open flow gpio: %v", err)
+			failure <- err
+		}
+		defer flow.Close()
+
+		if err := flow.SetDirection(embd.In); err != nil {
+			log.Errorf("Could not set pin direction: %v", err)
+			failure <- err
+		}
+		flow.ActiveLow(true)
+
+		reading := make(chan bool)
+		go func(c chan bool) {
+			err := flow.Watch(embd.EdgeRising, func(flow embd.DigitalPin) {
+				log.Info("Received pin interrupt")
+				reading <- true
+			})
+			if err != nil {
+				log.Errorf("Could not watch port: %v", err)
+				failure <- err
+			}
+		}(reading)
+
+		var flowCounter int
+		for {
+			res := <-reading
+			if res {
+				flowCounter++
+			}
+			log.Infof("flow reader counter: %v", flowCounter)
 		}
 	}()
 
