@@ -7,9 +7,8 @@ import (
 )
 
 type WaterFlowObserver struct {
-	waterFlow     prometheus.Gauge
-	interruptChan chan bool
-	flowCounter   int
+	waterFlow   prometheus.Gauge
+	flowCounter int
 }
 
 func NewWaterFlowObserver() *WaterFlowObserver {
@@ -22,6 +21,8 @@ func NewWaterFlowObserver() *WaterFlowObserver {
 }
 
 func (p *WaterFlowObserver) Run() error {
+	var interruptChan = make(chan bool)
+
 	flow, err := embd.NewDigitalPin(26)
 	if err != nil {
 		log.Errorf("Could not open flow gpio: %v", err)
@@ -35,15 +36,22 @@ func (p *WaterFlowObserver) Run() error {
 	}
 	flow.ActiveLow(true)
 
-	go p.aggregateInterrupts()
-
 	flow.Watch(embd.EdgeRising, func(flow embd.DigitalPin) {
 		log.Info("Received pin interrupt")
-		p.interruptChan <- true
+		interruptChan <- true
 	})
 	if err != nil {
 		log.Fatalf("Could not watch port: %v", err)
 	}
+
+	for {
+		res := <-interruptChan
+		if res {
+			p.flowCounter++
+		}
+		log.Infof("flow reader counter: %v", p.flowCounter)
+	}
+
 	return err
 }
 
@@ -51,18 +59,10 @@ func (p *WaterFlowObserver) Stop() error {
 	return nil
 }
 
-func (p *WaterFlowObserver) aggregateInterrupts() {
-	for {
-		res := <-p.interruptChan
-		if res {
-			p.flowCounter++
-		}
-		log.Infof("flow reader counter: %v", p.flowCounter)
-	}
-}
-
 func (p *WaterFlowObserver) Observe() error {
+	log.Infof("Collecting: %v", "water flow")
 	p.waterFlow.Set(float64(p.flowCounter))
+	log.Infof("water flow: %v", p.flowCounter)
 	return nil
 }
 

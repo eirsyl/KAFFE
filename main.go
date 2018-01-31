@@ -113,10 +113,12 @@ func main() {
 	for _, observer := range metrics {
 		// Run the observer as a background goroutine
 		go func(ob MetricObserver) {
+			log.Infof("Starting observer: %v", observer)
 			err := ob.Run()
 			if err != nil {
 				failure <- err
 			}
+			log.Infof("Observer worker stopped: %v", observer)
 		}(observer)
 
 		// Run the observer function in a loop with 10s delay
