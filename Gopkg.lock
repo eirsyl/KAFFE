@@ -20,9 +20,20 @@
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/kidoman/embd"
-  packages = [".","convertors/mcp3008","host/generic","host/rpi"]
+  packages = [
+    ".",
+    "convertors/mcp3008",
+    "host/generic",
+    "host/rpi"
+  ]
   revision = "d3d8c0c5c68dc6caccebb7d720f36e64bafd0a62"
 
 [[projects]]
@@ -39,7 +50,11 @@
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
-  packages = ["prometheus","prometheus/promhttp"]
+  packages = [
+    "prometheus",
+    "prometheus/promhttp",
+    "prometheus/push"
+  ]
   revision = "c5b7fccd204277076155f10851dad72b76a49317"
   version = "v0.8.0"
 
@@ -52,13 +67,22 @@
 [[projects]]
   branch = "master"
   name = "github.com/prometheus/common"
-  packages = ["expfmt","internal/bitbucket.org/ww/goautoneg","model"]
+  packages = [
+    "expfmt",
+    "internal/bitbucket.org/ww/goautoneg",
+    "model"
+  ]
   revision = "89604d197083d4781071d3c65855d24ecfb0a563"
 
 [[projects]]
   branch = "master"
   name = "github.com/prometheus/procfs"
-  packages = [".","internal/util","nfs","xfs"]
+  packages = [
+    ".",
+    "internal/util",
+    "nfs",
+    "xfs"
+  ]
   revision = "cb4147076ac75738c9a7d279075a253c0cc5acbd"
 
 [[projects]]
@@ -66,6 +90,17 @@
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
   version = "v1.0.4"
+
+[[projects]]
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
+
+[[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -82,12 +117,15 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
+  packages = [
+    "unix",
+    "windows"
+  ]
   revision = "ff2a66f350cefa5c93a634eadb5d25bb60c85a9c"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1d8b016b5257b67629c287ad561c977c984e61df147b04d0f9967035a6307a77"
+  inputs-digest = "1e4cb7e8d991a16d7c914ebb7bb1b0fe16d841f3649d44c06d511ab679e779d2"
   solver-name = "gps-cdcl"
   solver-version = 1
