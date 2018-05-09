@@ -14,7 +14,7 @@ import (
 type WaterContainerObserver struct {
 	waterContainer prometheus.Gauge
 	mpc            *mcp3008.MCP3008
-	mut            *sync.Mutex
+	*sync.Mutex
 	hubot          string
 	token          string
 	containerEmpty bool
@@ -27,7 +27,7 @@ func NewWaterContainerObserver(mpc *mcp3008.MCP3008, mut *sync.Mutex, hubot stri
 			Help: "Water container switch on/off",
 		}),
 		mpc:            mpc,
-		mut:            mut,
+		Mutex:          mut,
 		hubot:          hubot,
 		token:          token,
 		containerEmpty: true,
@@ -67,8 +67,8 @@ func (p *WaterContainerObserver) postHubot(empty bool) {
 }
 
 func (p *WaterContainerObserver) Observe() error {
-	p.mut.Lock()
-	defer p.mut.Unlock()
+	p.Lock()
+	defer p.Unlock()
 
 	log.Infof("Collecting: %v", "water_container")
 
